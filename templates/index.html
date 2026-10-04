@@ -3,144 +3,226 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calculator — Web Demo</title>
+<title>Calculator</title>
 <style>
+    :root {
+        --bg: #F5F7FB;
+        --surface: #FFFFFF;
+        --display-bg: #17263D;
+        --display-text: #F8FAFC;
+        --digit-bg: #FFFFFF;
+        --digit-text: #17263D;
+        --util-bg: #E6ECF5;
+        --util-text: #42526B;
+        --op-bg: #2F6BFF;
+        --op-text: #FFFFFF;
+        --history-bg: #EAF0FA;
+        --secondary: #64748B;
+    }
+    [data-theme="dark"] {
+        --bg: #101A2B;
+        --surface: #202D42;
+        --display-bg: #0A1322;
+        --display-text: #F8FAFC;
+        --digit-bg: #26364D;
+        --digit-text: #F8FAFC;
+        --util-bg: #35455D;
+        --util-text: #E5ECF5;
+        --op-bg: #4B7FFF;
+        --op-text: #FFFFFF;
+        --history-bg: #1D2A3E;
+        --secondary: #A8B7CC;
+    }
     * { box-sizing: border-box; }
     body {
-        font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-        background: linear-gradient(160deg, #e8edf7 0%, #f5f7fb 60%);
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        background: var(--bg);
         min-height: 100vh;
         display: flex;
         justify-content: center;
         align-items: flex-start;
-        padding: 28px 16px;
+        padding: 24px 16px;
         margin: 0;
+        transition: background 0.2s ease;
     }
-    .card {
-        width: 380px;
+    .app {
+        width: 400px;
         max-width: 100%;
-        background: #ffffff;
-        border-radius: 24px;
-        box-shadow: 0 10px 40px rgba(23, 38, 61, 0.10);
-        padding: 20px;
+        padding: 16px;
     }
-    header {
+    .header {
+        background: var(--surface);
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(23, 38, 61, 0.06);
+        height: 52px;
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        margin-bottom: 14px;
+        padding: 0 10px 0 16px;
+        margin-bottom: 10px;
     }
-    header .title {
-        font-size: 13px;
+    .header .title {
+        font-size: 11px;
         font-weight: 700;
         letter-spacing: 0.12em;
-        color: #2f6bff;
-        text-transform: uppercase;
+        color: var(--op-bg);
+        flex: 1;
     }
-    header .subtitle {
-        font-size: 12px;
-        color: #64748b;
+    .header button {
+        border: none;
+        border-radius: 14px;
+        height: 42px;
+        padding: 0 14px;
+        font-size: 14px;
+        font-family: inherit;
+        cursor: pointer;
+        margin-left: 8px;
+        transition: filter 0.12s ease, transform 0.06s ease;
+    }
+    .header button:active { transform: scale(0.95); }
+    .btn-util {
+        background: var(--util-bg);
+        color: var(--util-text);
+    }
+    .btn-op {
+        background: var(--op-bg);
+        color: var(--op-text);
     }
     .display {
-        background: #17263d;
-        color: #f8fafc;
-        border-radius: 16px;
-        padding: 18px 16px;
+        background: var(--display-bg);
+        color: var(--display-text);
+        border-radius: 24px;
+        padding: 20px;
         font-size: 30px;
         font-weight: 500;
         text-align: right;
-        min-height: 72px;
+        min-height: 90px;
         word-break: break-all;
         line-height: 1.3;
         display: flex;
         align-items: flex-end;
         justify-content: flex-end;
-        margin-bottom: 14px;
+        margin-bottom: 10px;
+    }
+    .sci-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+    .sci-row button {
+        border: none;
+        border-radius: 14px;
+        height: 44px;
+        background: var(--util-bg);
+        color: var(--util-text);
+        font-size: 15px;
+        font-family: inherit;
+        cursor: pointer;
+        transition: filter 0.12s ease, transform 0.06s ease;
     }
     .keys {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 8px;
-    }
-    button {
-        border: none;
-        border-radius: 14px;
-        padding: 15px 0;
-        font-size: 19px;
-        font-family: inherit;
-        cursor: pointer;
-        transition: transform 0.06s ease, filter 0.12s ease;
-        -webkit-tap-highlight-color: transparent;
-    }
-    button:hover { filter: brightness(0.96); }
-    button:active { transform: scale(0.94); }
-    .digit { background: #f2f5fa; color: #17263d; }
-    .util { background: #e6ecf5; color: #42526b; }
-    .op { background: #2f6bff; color: #fff; font-size: 21px; }
-    .sci { background: #eef2fa; color: #42526b; font-size: 15px; }
-    .history {
-        margin-top: 16px;
-        background: #f7f9fd;
-        border-radius: 16px;
-        padding: 12px;
-    }
-    .history-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
         margin-bottom: 8px;
     }
-    .history-head h3 { margin: 0; font-size: 14px; color: #17263d; }
-    .history-head button {
-        padding: 5px 14px;
-        font-size: 12px;
-        background: #e6ecf5;
-        color: #42526b;
+    .keys button {
+        border: none;
+        border-radius: 20px;
+        height: 56px;
+        font-size: 20px;
+        font-family: inherit;
+        cursor: pointer;
+        transition: filter 0.12s ease, transform 0.06s ease;
+        -webkit-tap-highlight-color: transparent;
     }
-    .history-list { max-height: 210px; overflow-y: auto; }
+    .keys button:hover, .sci-row button:hover, .header button:hover { filter: brightness(0.95); }
+    .keys button:active, .sci-row button:active { transform: scale(0.94); }
+    .digit { background: var(--digit-bg); color: var(--digit-text); }
+    .util { background: var(--util-bg); color: var(--util-text); }
+    .op { background: var(--op-bg); color: var(--op-text); }
+    .history {
+        background: var(--history-bg);
+        border-radius: 20px;
+        padding: 12px;
+        display: none;
+    }
+    .history.open { display: block; }
+    .history-head {
+        display: flex;
+        align-items: center;
+        height: 40px;
+        margin-bottom: 6px;
+    }
+    .history-head h3 {
+        margin: 0;
+        flex: 1;
+        font-size: 18px;
+        color: var(--digit-text);
+    }
+    .history-head button {
+        border: none;
+        border-radius: 14px;
+        height: 36px;
+        padding: 0 14px;
+        font-size: 13px;
+        font-family: inherit;
+        background: var(--util-bg);
+        color: var(--util-text);
+        cursor: pointer;
+    }
+    .history-list { max-height: 220px; overflow-y: auto; }
     .row {
         display: flex;
         justify-content: space-between;
         align-items: center;
         gap: 8px;
-        background: #fff;
-        border-radius: 12px;
-        padding: 8px 12px;
-        margin-bottom: 6px;
-        box-shadow: 0 1px 4px rgba(23, 38, 61, 0.05);
+        background: var(--surface);
+        border-radius: 10px;
+        padding: 8px 8px 8px 10px;
+        margin-bottom: 4px;
     }
-    .row .expr { font-size: 14px; color: #17263d; word-break: break-all; }
-    .row .time { font-size: 11px; color: #94a3b8; margin-top: 2px; }
-    .row button { padding: 4px 12px; font-size: 12px; background: #eef2fa; color: #64748b; }
+    .row .expr { font-size: 14px; color: var(--digit-text); word-break: break-all; }
+    .row .time { font-size: 11px; color: var(--secondary); margin-top: 2px; }
+    .row button {
+        border: none;
+        border-radius: 10px;
+        height: 42px;
+        padding: 0 12px;
+        font-size: 13px;
+        font-family: inherit;
+        background: var(--util-bg);
+        color: var(--util-text);
+        cursor: pointer;
+        flex-shrink: 0;
+    }
     .hint {
-        color: #94a3b8;
+        color: var(--secondary);
         font-size: 12px;
         margin-top: 12px;
         text-align: center;
         line-height: 1.5;
     }
-    .hint code {
-        background: #eef2fa;
-        border-radius: 4px;
-        padding: 1px 5px;
-        font-size: 11px;
-    }
 </style>
 </head>
 <body>
-<div class="card">
-    <header>
-        <span class="title">Calculator</span>
-        <span class="subtitle">Web Demo</span>
-    </header>
+<div class="app">
+    <div class="header">
+        <span class="title">CALCULATOR</span>
+        <button class="btn-util" id="theme-btn" onclick="toggleTheme()">Dark</button>
+        <button class="btn-op" id="history-btn" onclick="toggleHistory()">History</button>
+    </div>
 
     <div class="display" id="display">0</div>
 
+    <div class="sci-row">
+        <button onclick="append('√')">√</button>
+        <button onclick="append('²')">x²</button>
+        <button onclick="append('^')">x^y</button>
+        <button onclick="append('%')">%</button>
+    </div>
+
     <div class="keys">
-        <button class="sci" onclick="append('√')">√</button>
-        <button class="sci" onclick="append('²')">x²</button>
-        <button class="sci" onclick="append('^')">x^y</button>
-        <button class="sci" onclick="append('%')">%</button>
         <button class="util" onclick="clearAll()">C</button>
         <button class="util" onclick="append('(')">(</button>
         <button class="util" onclick="append(')')">)</button>
@@ -163,16 +245,16 @@
         <button class="op" onclick="equals()">=</button>
     </div>
 
-    <div class="history">
+    <div class="history" id="history-panel">
         <div class="history-head">
             <h3>History</h3>
-            <button onclick="clearHistory()">Clear all</button>
+            <button onclick="clearHistory()">Clear</button>
         </div>
         <div class="history-list" id="history-list"></div>
     </div>
 
     <div class="hint">
-        Web demo page — every calculation is performed by the backend API
+        Web demo — every calculation runs through the backend API
         (<code>POST /api/calculate</code>). Keyboard: digits, + - * /, ( ),
         Enter =, Backspace, Esc to clear.
     </div>
@@ -263,6 +345,30 @@
             fetch("/api/history", { method: "DELETE" }).then(loadHistory);
         }
     }
+
+    function toggleHistory() {
+        const panel = document.getElementById("history-panel");
+        const open = panel.classList.toggle("open");
+        if (open) loadHistory();
+    }
+
+    function toggleTheme() {
+        const dark = document.documentElement.getAttribute("data-theme") !== "dark";
+        document.documentElement.setAttribute("data-theme", dark ? "dark" : "");
+        document.getElementById("theme-btn").textContent = dark ? "Light" : "Dark";
+        try {
+            localStorage.setItem("theme", dark ? "dark" : "light");
+        } catch (e) { /* ignore */ }
+    }
+
+    (function restoreTheme() {
+        let saved = null;
+        try { saved = localStorage.getItem("theme"); } catch (e) { /* ignore */ }
+        if (saved === "dark") {
+            document.documentElement.setAttribute("data-theme", "dark");
+            document.getElementById("theme-btn").textContent = "Light";
+        }
+    })();
 
     document.addEventListener("keydown", e => {
         const k = e.key;
