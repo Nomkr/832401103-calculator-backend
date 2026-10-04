@@ -261,6 +261,9 @@
 </div>
 <script>
     let expr = "";
+    // True right after "=" produced a result: the next key either starts a
+    // fresh expression or continues from the result if it is an operator.
+    let justCalculated = false;
     const display = document.getElementById("display");
     const displayMap = { "÷": "/", "×": "*" };
 
@@ -273,17 +276,24 @@
     }
 
     function append(ch) {
-        expr += displayMap[ch] || ch;
+        const raw = displayMap[ch] || ch;
+        if (justCalculated) {
+            if (!"+-*/^%²".includes(raw)) expr = "";
+            justCalculated = false;
+        }
+        expr += raw;
         refreshDisplay();
     }
 
     function backspace() {
+        justCalculated = false;
         expr = expr.slice(0, -1);
         refreshDisplay();
     }
 
     function clearAll() {
         expr = "";
+        justCalculated = false;
         refreshDisplay();
     }
 
@@ -301,10 +311,12 @@
                 display.textContent = j.success
                     ? toDisplay(j.expression) + " = " + j.result
                     : j.message;
+                justCalculated = !!j.success;
                 loadHistory();
             })
             .catch(() => {
                 display.textContent = "Request failed";
+                justCalculated = false;
             });
     }
 
