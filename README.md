@@ -103,11 +103,15 @@ operators, invalid input, division by zero, and the Flask API
 
 ## Deployment
 
-The repository contains a `Dockerfile` and `render.yaml` for deploying to
-a Docker-capable web service such as Render. The service reads the `PORT`
-environment variable and uses `/api/health` as the health check path.
-See `DEPLOYMENT.md` for step-by-step instructions. In production use
-HTTPS and give SQLite a persistent disk (or switch to a managed database).
+The submitted backend is deployed on PythonAnywhere at
+`https://nomkr.pythonanywhere.com`. The health endpoint is
+`/api/health`; it currently returns HTTP 200. PythonAnywhere's persistent
+user filesystem keeps the SQLite history file across web-app reloads.
+
+The repository also contains a `Dockerfile` and `render.yaml` for local
+verification or an alternative Docker-capable host. See `DEPLOYMENT.md` for
+the PythonAnywhere WSGI configuration and the Docker check commands. Use
+HTTPS in production and place SQLite on persistent storage.
 
 ## Project Structure
 

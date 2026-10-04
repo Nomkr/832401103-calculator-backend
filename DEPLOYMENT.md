@@ -17,25 +17,44 @@ curl -X POST http://127.0.0.1:5000/api/calculate \
   -d '{"expression":"(1+2)*3"}'
 ```
 
-## Render Steps
+## PythonAnywhere Deployment (Current)
 
-1. Sign up or log in to Render and prepare a GitHub repository.
-2. Push this directory as a standalone repository root to GitHub.
-3. Create a Web Service, connect the repository, and choose Docker as
-   the runtime.
-4. Use the `Dockerfile` at the repository root and set the health check
-   path to `/api/health`.
-5. After the build finishes, open
-   `https://<service-name>.onrender.com/api/health`.
-6. Put this HTTPS URL first in the Android `BACKEND_URLS` list and
-   rebuild the APK.
+The submitted service is deployed at `https://nomkr.pythonanywhere.com`.
+
+1. Open a PythonAnywhere Bash console and clone this repository as a
+   standalone project.
+2. Create or activate a virtual environment and install dependencies:
+   `pip install -r requirements.txt`.
+3. In the **Web** tab, create a Flask application and select the virtual
+   environment used above.
+4. In the WSGI configuration file, add the project directory to `sys.path`
+   and expose the Flask object as `application`:
+
+   ```python
+   import sys
+   sys.path.insert(0, "/home/<username>/832401103-calculator-backend")
+   from app import app as application
+   ```
+
+5. Reload the web application and verify:
+   `https://<username>.pythonanywhere.com/api/health`.
+6. Put the HTTPS URL first in the Android `BACKEND_URLS` list and rebuild
+   the APK.
+
+The current deployment passes the health check at
+`https://nomkr.pythonanywhere.com/api/health` with HTTP 200.
+
+## Docker Local Verification
+
+The `Dockerfile` remains useful for reproducible local checks and for a
+Docker-capable hosting provider. The `render.yaml` file is retained as an
+optional alternative deployment description; it is not the service used for
+the submitted deployment.
 
 ## Owner To-dos
 
-- Log in to the deployment platform and confirm the free instance plan.
-- Create two separate GitHub repositories for the Android and Flask
-  projects.
-- Fill the public HTTPS backend URL into the Android code.
+- Keep the PythonAnywhere web application running during the evaluation.
+- Check `/api/health` before publishing the blog.
 - Install the final APK on an emulator or device and capture demo
   screenshots.
 
