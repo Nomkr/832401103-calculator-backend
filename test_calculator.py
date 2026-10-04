@@ -41,6 +41,8 @@ class CalculatorTests(unittest.TestCase):
             calculate("5/0")
         with self.assertRaises(CalculationError):
             calculate("1e3")
+        with self.assertRaisesRegex(CalculationError, "Result out of range"):
+            calculate("10^10000")
 
     def test_scientific_operators(self):
         self.assertEqual(calculate("√9"), 3)

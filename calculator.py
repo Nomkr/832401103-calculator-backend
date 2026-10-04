@@ -174,6 +174,8 @@ def calculate(expression):
         raise
     except ZeroDivisionError:
         raise CalculationError("Division by zero")
+    except OverflowError:
+        raise CalculationError("Result out of range")
     except (IndexError, ValueError, TypeError):
         raise CalculationError("Invalid expression")
 
