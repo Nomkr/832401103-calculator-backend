@@ -10,7 +10,7 @@ Exposes a JSON HTTP API:
 
 import os
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, render_template, request
 from werkzeug.exceptions import HTTPException
 
 from calculator import calculate, CalculationError
@@ -62,13 +62,8 @@ def health():
 
 @app.route("/")
 def index():
-    """Landing page: point visitors to the API endpoints."""
-    return jsonify({
-        "service": "calculator-backend",
-        "health": "/api/health",
-        "calculate": "POST /api/calculate",
-        "history": "GET /api/history",
-    })
+    """Serve the browser demo page. All computation still goes through the API."""
+    return render_template("index.html")
 
 
 @app.route("/api/calculate", methods=["POST"])

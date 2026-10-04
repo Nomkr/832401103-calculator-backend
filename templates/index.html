@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculator — Web Demo</title>
+<style>
+    * { box-sizing: border-box; }
+    body {
+        font-family: system-ui, -apple-system, sans-serif;
+        background: #f5f7fb;
+        display: flex;
+        justify-content: center;
+        padding: 20px;
+        margin: 0;
+    }
+    .calc { width: 360px; max-width: 100%; }
+    .display {
+        background: #17263d;
+        color: #f8fafc;
+        border-radius: 16px;
+        padding: 20px;
+        font-size: 28px;
+        text-align: right;
+        min-height: 66px;
+        word-break: break-all;
+        margin-bottom: 12px;
+    }
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+    }
+    button {
+        border: none;
+        border-radius: 12px;
+        padding: 16px 0;
+        font-size: 20px;
+        cursor: pointer;
+    }
+    .digit { background: #fff; color: #17263d; }
+    .util { background: #e6ecf5; color: #42526b; }
+    .op { background: #2f6bff; color: #fff; }
+    .sci { background: #e6ecf5; color: #42526b; font-size: 16px; }
+    .history {
+        margin-top: 16px;
+        background: #eaf0fa;
+        border-radius: 16px;
+        padding: 12px;
+    }
+    .history h3 { margin: 0 0 8px; font-size: 15px; color: #17263d; }
+    .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        background: #fff;
+        border-radius: 10px;
+        padding: 8px 12px;
+        margin-bottom: 6px;
+    }
+    .row .expr { font-size: 14px; color: #17263d; word-break: break-all; }
+    .row .time { font-size: 12px; color: #64748b; margin-top: 2px; }
+    .row button { padding: 4px 12px; font-size: 13px; background: #e6ecf5; color: #42526b; }
+    .history .clear-btn { width: 100%; margin-top: 4px; background: #e6ecf5; color: #42526b; font-size: 14px; }
+    .hint {
+        color: #64748b;
+        font-size: 13px;
+        margin-top: 12px;
+        text-align: center;
+    }
+</style>
+</head>
+<body>
+<div class="calc">
+    <div class="display" id="display">0</div>
+    <div class="grid">
+        <button class="sci" onclick="append('√')">√</button>
+        <button class="sci" onclick="append('²')">x²</button>
+        <button class="sci" onclick="append('^')">x^y</button>
+        <button class="sci" onclick="append('%')">%</button>
+        <button class="util" onclick="clearAll()">C</button>
+        <button class="util" onclick="append('(')">(</button>
+        <button class="util" onclick="append(')')">)</button>
+        <button class="op" onclick="append('÷')">÷</button>
+        <button class="digit" onclick="append('7')">7</button>
+        <button class="digit" onclick="append('8')">8</button>
+        <button class="digit" onclick="append('9')">9</button>
+        <button class="op" onclick="append('×')">×</button>
+        <button class="digit" onclick="append('4')">4</button>
+        <button class="digit" onclick="append('5')">5</button>
+        <button class="digit" onclick="append('6')">6</button>
+        <button class="op" onclick="append('-')">-</button>
+        <button class="digit" onclick="append('1')">1</button>
+        <button class="digit" onclick="append('2')">2</button>
+        <button class="digit" onclick="append('3')">3</button>
+        <button class="op" onclick="append('+')">+</button>
+        <button class="digit" onclick="append('.')">.</button>
+        <button class="digit" onclick="append('0')">0</button>
+        <button class="util" onclick="backspace()">⌫</button>
+        <button class="op" onclick="equals()">=</button>
+    </div>
+    <div class="history" id="history">
+        <h3>History</h3>
+        <div id="history-list"></div>
+        <button class="clear-btn" onclick="clearHistory()">Clear all</button>
+    </div>
+    <div class="hint">
+        Web demo page. Every calculation is performed by the backend API
+        (<code>POST /api/calculate</code>); this page only renders the response.
+    </div>
+</div>
+<script>
+    let expr = "";
+    const display = document.getElementById("display");
+    const displayMap = { "÷": "/", "×": "*" };
+
+    function toDisplay(text) {
+        return text.replace(/\*/g, "×").replace(/\//g, "÷");
+    }
+
+    function refreshDisplay() {
+        display.textContent = expr ? toDisplay(expr) : "0";
+    }
+
+    function append(ch) {
+        expr += displayMap[ch] || ch;
+        refreshDisplay();
+    }
+
+    function backspace() {
+        expr = expr.slice(0, -1);
+        refreshDisplay();
+    }
+
+    function clearAll() {
+        expr = "";
+        refreshDisplay();
+    }
+
+    function equals() {
+        if (!expr) return;
+        fetch("/api/calculate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ expression: expr })
+        })
+            .then(r => r.json())
+            .then(j => {
+                display.textContent = j.success
+                    ? toDisplay(j.expression) + " = " + j.result
+                    : j.message;
+                loadHistory();
+            })
+            .catch(() => {
+                display.textContent = "Request failed";
+            });
+    }
+
+    function loadHistory() {
+        fetch("/api/history")
+            .then(r => r.json())
+            .then(j => {
+                const list = document.getElementById("history-list");
+                list.innerHTML = "";
+                const rows = j.history || [];
+                if (rows.length === 0) {
+                    list.innerHTML = '<div class="hint">No history yet</div>';
+                    return;
+                }
+                rows.forEach(item => {
+                    const row = document.createElement("div");
+                    row.className = "row";
+                    const text = document.createElement("div");
+                    text.innerHTML =
+                        '<div class="expr">' + toDisplay(item.expression) + " = " + item.result + "</div>" +
+                        '<div class="time">' + item.created_at + "</div>";
+                    const btn = document.createElement("button");
+                    btn.textContent = "Delete";
+                    btn.onclick = () => deleteOne(item.id);
+                    row.appendChild(text);
+                    row.appendChild(btn);
+                    list.appendChild(row);
+                });
+            });
+    }
+
+    function deleteOne(id) {
+        fetch("/api/history/" + id, { method: "DELETE" }).then(loadHistory);
+    }
+
+    function clearHistory() {
+        if (confirm("Delete all history records?")) {
+            fetch("/api/history", { method: "DELETE" }).then(loadHistory);
+        }
+    }
+
+    loadHistory();
+</script>
+</body>
+</html>
