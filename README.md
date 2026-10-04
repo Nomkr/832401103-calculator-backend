@@ -91,6 +91,24 @@ Error response:
 { "success": false, "message": "Division by zero" }
 ```
 
+## Live Verification
+
+The deployed service is available at `https://nomkr.pythonanywhere.com`.
+Run these read-only and calculation checks before a demonstration:
+
+```bash
+curl https://nomkr.pythonanywhere.com/api/health
+curl -X POST https://nomkr.pythonanywhere.com/api/calculate \
+  -H "Content-Type: application/json" \
+  -d '{"expression":"(1+2)*3"}'
+curl https://nomkr.pythonanywhere.com/api/history
+```
+
+The health endpoint should return `{"status":"ok"}`. A successful calculate
+request returns `{"success":true,...,"result":9}` and creates one history
+record, which can then be viewed by the history request or removed through
+the delete API.
+
 ## Testing
 
 ```bash
