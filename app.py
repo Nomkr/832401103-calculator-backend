@@ -60,6 +60,17 @@ def health():
     return jsonify({"status": "ok"})
 
 
+@app.route("/")
+def index():
+    """Landing page: point visitors to the API endpoints."""
+    return jsonify({
+        "service": "calculator-backend",
+        "health": "/api/health",
+        "calculate": "POST /api/calculate",
+        "history": "GET /api/history",
+    })
+
+
 @app.route("/api/calculate", methods=["POST"])
 def calculate_endpoint():
     """Evaluate the expression in the JSON body and store successful results."""
