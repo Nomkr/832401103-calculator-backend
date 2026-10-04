@@ -37,10 +37,24 @@ class CalculatorTests(unittest.TestCase):
                     calculate(expression)
 
     def test_division_by_zero_and_non_finite_result(self):
-        with self.assertRaisesRegex(CalculationError, "不能除以 0"):
+        with self.assertRaisesRegex(CalculationError, "Division by zero"):
             calculate("5/0")
         with self.assertRaises(CalculationError):
             calculate("1e3")
+
+    def test_scientific_operators(self):
+        self.assertEqual(calculate("√9"), 3)
+        self.assertEqual(calculate("√(16)"), 4)
+        self.assertEqual(calculate("5²"), 25)
+        self.assertEqual(calculate("-3²"), -9)
+        self.assertEqual(calculate("2^10"), 1024)
+        self.assertEqual(calculate("2^3^2"), 512)
+        self.assertEqual(calculate("50%"), 0.5)
+        self.assertEqual(calculate("5²%"), 0.25)
+        with self.assertRaisesRegex(CalculationError, "square root of a negative"):
+            calculate("√-9")
+        with self.assertRaisesRegex(CalculationError, "Invalid power operation"):
+            calculate("(-2)^0.5")
 
 
 if __name__ == "__main__":

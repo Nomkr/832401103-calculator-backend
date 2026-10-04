@@ -1,38 +1,39 @@
-# 代码规范（Code Style）
+# Code Style
 
-本项目 Python 代码遵循 **PEP 8**（Python 官方代码风格指南）。
+Python code in this repository follows **PEP 8**.
 
-> 规范来源：https://peps.python.org/pep-0008/
+Source: https://peps.python.org/pep-0008/
 
-## 命名规范
+## Naming
 
-| 类型 | 规则 | 示例 |
+| Kind | Rule | Example |
 |---|---|---|
-| 函数名 | 小写 + 下划线 | `add_history`、`get_history`、`calculate` |
-| 变量名 | 小写 + 下划线 | `tokens`、`created_at`、`expression` |
-| 类名 | 大驼峰（每个单词首字母大写） | `Parser`、`CalculationError` |
-| 常量 | 全大写 + 下划线 | `DB_FILE` |
+| Functions | snake_case | `add_history`, `calculate` |
+| Variables | snake_case | `tokens`, `created_at` |
+| Classes | PascalCase | `Parser`, `CalculationError` |
+| Constants | UPPER_SNAKE_CASE | `DB_FILE` |
 
-## 格式规范
+## Formatting
 
-- 使用 **4 个空格**缩进（不使用 Tab）。
-- 每个函数/类都有 `docstring`（三引号文档字符串）说明其用途。
-- 关键逻辑处写注释，解释「为什么这样做」，而不是复述代码。
-- 单行尽量不超过 79 个字符。
+- 4-space indentation (no tabs).
+- Every function and class has a docstring describing its purpose.
+- Comments explain *why*, not *what*.
+- Lines kept under 79 characters where practical.
 
-## 结构规范
+## Structure
 
-- 一个函数只做一件事。
-- 分层清晰，职责分离：
+One function, one responsibility. Layers are separated:
 
-| 文件 | 层 | 职责 |
+| File | Layer | Responsibility |
 |---|---|---|
-| `app.py` | 控制器 | 接收请求、路由、返回响应 |
-| `calculator.py` | 业务 | 表达式解析与计算 |
-| `database.py` | 数据 | 数据库增查删 |
+| `app.py` | Controller | Routing, requests, responses |
+| `calculator.py` | Service | Expression parsing and evaluation |
+| `database.py` | Data | Database access |
 
-## 安全与健壮性
+## Security & Robustness
 
-- 禁止使用 `eval` / `exec` 执行用户输入。
-- 数据库操作一律使用参数化查询（`?` 占位符），防止 SQL 注入。
-- 对非法输入和除零做异常处理，返回友好错误信息，不直接崩溃。
+- `eval`/`exec` are never used on user input.
+- All SQL uses parameterized queries (`?` placeholders) to prevent
+  injection.
+- Invalid input and division by zero raise `CalculationError` with a
+  user-friendly message instead of crashing.

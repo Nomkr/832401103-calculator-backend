@@ -1,15 +1,11 @@
-"""
-database.py —— 计算器的"仓库管理员"。
+"""SQLite persistence layer for calculation history.
 
-这个文件负责跟 SQLite 数据库打交道：存历史、查历史、删历史。
-数据库就是一个文件（calculator.db），存在本文件同目录下。
-
-对外提供 5 个函数：
-    init_db()              建表（第一次运行时调用）
-    add_history(expr, res) 存一条历史
-    get_history()          查所有历史（新的在前）
-    delete_history(id)     删一条历史
-    clear_history()        清空全部历史（加分项）
+Exposes:
+    init_db()              create the history table (idempotent)
+    add_history(expr, r)   insert one record
+    get_history()          list all records, newest first
+    delete_history(id)     delete one record; returns whether it existed
+    clear_history()        delete all records
 """
 
 import os
@@ -17,8 +13,8 @@ import sqlite3
 from contextlib import contextmanager
 from datetime import datetime
 
-# 数据库文件的完整路径：固定放在本文件同目录下，无论从哪里运行都不会跑偏。
-# __file__ 是"当前这个文件的路径"，os.path.dirname 取它所在的文件夹。
+# The database file lives next to this module unless CALCULATOR_DB_FILE
+# points elsewhere (used on platforms with a persistent disk).
 DB_FILE = os.getenv(
     "CALCULATOR_DB_FILE",
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "calculator.db"),
@@ -26,12 +22,11 @@ DB_FILE = os.getenv(
 
 
 def get_connection():
-    """打开数据库连接（相当于拿钥匙进仓库）。"""
+    """Open a connection to the database."""
     db_dir = os.path.dirname(os.path.abspath(DB_FILE))
     os.makedirs(db_dir, exist_ok=True)
-    # timeout 防止多个请求短时间写入时立即报 database is locked。
+    # A timeout avoids "database is locked" under concurrent writes.
     conn = sqlite3.connect(DB_FILE, timeout=5)
-    # 让查询结果能"按列名"取值，方便后面转成字典
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA busy_timeout = 5000")
     return conn
@@ -39,7 +34,7 @@ def get_connection():
 
 @contextmanager
 def db_session():
-    """提供一个自动提交、异常回滚并始终关闭的数据库会话。"""
+    """Yield a connection that commits on success and rolls back on error."""
     conn = get_connection()
     try:
         yield conn
@@ -52,7 +47,7 @@ def db_session():
 
 
 def init_db():
-    """建表。CREATE TABLE IF NOT EXISTS = 表不存在才建，存在就跳过。"""
+    """Create the history table if it does not exist."""
     with db_session() as conn:
         conn.execute(
             """
@@ -67,8 +62,8 @@ def init_db():
 
 
 def add_history(expression, result):
-    """存一条历史。INSERT INTO ... VALUES (?, ?, ?) 里的 ? 是"占位符"。"""
-    created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # 当前时间，格式如 2026-10-03 10:20:00
+    """Insert one calculation record with the current timestamp."""
+    created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     with db_session() as conn:
         conn.execute(
             "INSERT INTO calculation_history (expression, result, created_at) VALUES (?, ?, ?)",
@@ -77,17 +72,16 @@ def add_history(expression, result):
 
 
 def get_history():
-    """查所有历史。ORDER BY id DESC = 按 id 倒序，新的在前面。"""
+    """Return all records as dicts, newest first."""
     with db_session() as conn:
         rows = conn.execute(
             "SELECT id, expression, result, created_at FROM calculation_history ORDER BY id DESC"
         ).fetchall()
-    # 把每一行转成字典，方便 app.py 直接转成 JSON 返回给前端
     return [dict(row) for row in rows]
 
 
 def delete_history(history_id):
-    """删一条历史。WHERE id = ? 表示只删 id 匹配的那一行。"""
+    """Delete one record; return True if it existed."""
     with db_session() as conn:
         cursor = conn.execute("DELETE FROM calculation_history WHERE id = ?", (history_id,))
         deleted = cursor.rowcount > 0
@@ -95,24 +89,22 @@ def delete_history(history_id):
 
 
 def clear_history():
-    """清空全部历史（加分项）。"""
+    """Delete all records."""
     with db_session() as conn:
         conn.execute("DELETE FROM calculation_history")
 
 
-# 直接运行本文件时，执行下面的测试
 if __name__ == "__main__":
     init_db()
     add_history("1+2", 3)
     add_history("(2+3)*4", 20)
 
-    print("全部历史（新的在前）：")
+    print("History (newest first):")
     for row in get_history():
         print(row)
 
-    # 删除最新那条
     latest = get_history()[0]
     delete_history(latest["id"])
-    print("删除最新一条后：")
+    print("After deleting the latest:")
     for row in get_history():
         print(row)

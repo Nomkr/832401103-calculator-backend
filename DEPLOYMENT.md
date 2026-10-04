@@ -1,6 +1,6 @@
-# 后端部署清单
+# Backend Deployment Guide
 
-## 部署前本地检查
+## Pre-deployment Checks
 
 ```bash
 python -m unittest discover -v
@@ -8,7 +8,7 @@ docker build -t calculator-backend .
 docker run --rm -p 5000:5000 calculator-backend
 ```
 
-另开终端验证：
+Verify in another terminal:
 
 ```bash
 curl http://127.0.0.1:5000/api/health
@@ -17,22 +17,31 @@ curl -X POST http://127.0.0.1:5000/api/calculate \
   -d '{"expression":"(1+2)*3"}'
 ```
 
-## Render 操作
+## Render Steps
 
-1. 注册或登录 Render，并准备一个 GitHub 仓库。
-2. 把本目录作为独立仓库根目录推送到 GitHub。
-3. 创建 Web Service，选择该仓库，运行方式选择 Docker。
-4. Dockerfile 使用根目录的 `Dockerfile`，健康检查填写 `/api/health`。
-5. 部署完成后打开 `https://服务名.onrender.com/api/health`。
-6. 将这个 HTTPS 地址加入 Android 的 `BACKEND_URLS` 第一项并重新构建 APK。
+1. Sign up or log in to Render and prepare a GitHub repository.
+2. Push this directory as a standalone repository root to GitHub.
+3. Create a Web Service, connect the repository, and choose Docker as
+   the runtime.
+4. Use the `Dockerfile` at the repository root and set the health check
+   path to `/api/health`.
+5. After the build finishes, open
+   `https://<service-name>.onrender.com/api/health`.
+6. Put this HTTPS URL first in the Android `BACKEND_URLS` list and
+   rebuild the APK.
 
-## 需要项目作者完成的事情
+## Owner To-dos
 
-- 登录部署平台并确认免费实例或服务器方案。
-- 创建两个独立 GitHub 仓库，分别上传 Android 和 Flask 目录。
-- 将后端公网 HTTPS 地址填入 Android 代码。
-- 在模拟器或真机上重新安装最终 APK，并保存演示截图。
+- Log in to the deployment platform and confirm the free instance plan.
+- Create two separate GitHub repositories for the Android and Flask
+  projects.
+- Fill the public HTTPS backend URL into the Android code.
+- Install the final APK on an emulator or device and capture demo
+  screenshots.
 
-## 数据持久化
+## Data Persistence
 
-后端支持 `CALCULATOR_DB_FILE` 环境变量。平台提供持久化磁盘时，将它设置为磁盘目录中的 `calculator.db`；没有持久化磁盘时，服务重建可能清空历史记录，但计算接口仍然可用。
+The backend supports the `CALCULATOR_DB_FILE` environment variable. Point
+it to a `calculator.db` on a persistent disk when the platform provides
+one. Without a persistent disk, a service rebuild may clear history, but
+the calculate API keeps working.

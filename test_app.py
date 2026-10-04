@@ -59,7 +59,7 @@ class ApiTests(unittest.TestCase):
         with patch.object(database, "add_history", side_effect=RuntimeError("disk error")):
             response = self.client.post("/api/calculate", json={"expression": "1+1"})
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.get_json()["message"], "服务器内部错误")
+        self.assertEqual(response.get_json()["message"], "Internal server error")
 
     def test_bad_request_is_json(self):
         response = self.client.post("/api/calculate", json={"expression": 3})
