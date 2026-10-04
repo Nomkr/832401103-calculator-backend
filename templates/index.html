@@ -7,74 +7,136 @@
 <style>
     * { box-sizing: border-box; }
     body {
-        font-family: system-ui, -apple-system, sans-serif;
-        background: #f5f7fb;
+        font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+        background: linear-gradient(160deg, #e8edf7 0%, #f5f7fb 60%);
+        min-height: 100vh;
         display: flex;
         justify-content: center;
-        padding: 20px;
+        align-items: flex-start;
+        padding: 28px 16px;
         margin: 0;
     }
-    .calc { width: 360px; max-width: 100%; }
+    .card {
+        width: 380px;
+        max-width: 100%;
+        background: #ffffff;
+        border-radius: 24px;
+        box-shadow: 0 10px 40px rgba(23, 38, 61, 0.10);
+        padding: 20px;
+    }
+    header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+    }
+    header .title {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        color: #2f6bff;
+        text-transform: uppercase;
+    }
+    header .subtitle {
+        font-size: 12px;
+        color: #64748b;
+    }
     .display {
         background: #17263d;
         color: #f8fafc;
         border-radius: 16px;
-        padding: 20px;
-        font-size: 28px;
+        padding: 18px 16px;
+        font-size: 30px;
+        font-weight: 500;
         text-align: right;
-        min-height: 66px;
+        min-height: 72px;
         word-break: break-all;
-        margin-bottom: 12px;
+        line-height: 1.3;
+        display: flex;
+        align-items: flex-end;
+        justify-content: flex-end;
+        margin-bottom: 14px;
     }
-    .grid {
+    .keys {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 8px;
     }
     button {
         border: none;
-        border-radius: 12px;
-        padding: 16px 0;
-        font-size: 20px;
+        border-radius: 14px;
+        padding: 15px 0;
+        font-size: 19px;
+        font-family: inherit;
         cursor: pointer;
+        transition: transform 0.06s ease, filter 0.12s ease;
+        -webkit-tap-highlight-color: transparent;
     }
-    .digit { background: #fff; color: #17263d; }
+    button:hover { filter: brightness(0.96); }
+    button:active { transform: scale(0.94); }
+    .digit { background: #f2f5fa; color: #17263d; }
     .util { background: #e6ecf5; color: #42526b; }
-    .op { background: #2f6bff; color: #fff; }
-    .sci { background: #e6ecf5; color: #42526b; font-size: 16px; }
+    .op { background: #2f6bff; color: #fff; font-size: 21px; }
+    .sci { background: #eef2fa; color: #42526b; font-size: 15px; }
     .history {
         margin-top: 16px;
-        background: #eaf0fa;
+        background: #f7f9fd;
         border-radius: 16px;
         padding: 12px;
     }
-    .history h3 { margin: 0 0 8px; font-size: 15px; color: #17263d; }
+    .history-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    .history-head h3 { margin: 0; font-size: 14px; color: #17263d; }
+    .history-head button {
+        padding: 5px 14px;
+        font-size: 12px;
+        background: #e6ecf5;
+        color: #42526b;
+    }
+    .history-list { max-height: 210px; overflow-y: auto; }
     .row {
         display: flex;
         justify-content: space-between;
         align-items: center;
         gap: 8px;
         background: #fff;
-        border-radius: 10px;
+        border-radius: 12px;
         padding: 8px 12px;
         margin-bottom: 6px;
+        box-shadow: 0 1px 4px rgba(23, 38, 61, 0.05);
     }
     .row .expr { font-size: 14px; color: #17263d; word-break: break-all; }
-    .row .time { font-size: 12px; color: #64748b; margin-top: 2px; }
-    .row button { padding: 4px 12px; font-size: 13px; background: #e6ecf5; color: #42526b; }
-    .history .clear-btn { width: 100%; margin-top: 4px; background: #e6ecf5; color: #42526b; font-size: 14px; }
+    .row .time { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+    .row button { padding: 4px 12px; font-size: 12px; background: #eef2fa; color: #64748b; }
     .hint {
-        color: #64748b;
-        font-size: 13px;
+        color: #94a3b8;
+        font-size: 12px;
         margin-top: 12px;
         text-align: center;
+        line-height: 1.5;
+    }
+    .hint code {
+        background: #eef2fa;
+        border-radius: 4px;
+        padding: 1px 5px;
+        font-size: 11px;
     }
 </style>
 </head>
 <body>
-<div class="calc">
+<div class="card">
+    <header>
+        <span class="title">Calculator</span>
+        <span class="subtitle">Web Demo</span>
+    </header>
+
     <div class="display" id="display">0</div>
-    <div class="grid">
+
+    <div class="keys">
         <button class="sci" onclick="append('√')">√</button>
         <button class="sci" onclick="append('²')">x²</button>
         <button class="sci" onclick="append('^')">x^y</button>
@@ -100,14 +162,19 @@
         <button class="util" onclick="backspace()">⌫</button>
         <button class="op" onclick="equals()">=</button>
     </div>
-    <div class="history" id="history">
-        <h3>History</h3>
-        <div id="history-list"></div>
-        <button class="clear-btn" onclick="clearHistory()">Clear all</button>
+
+    <div class="history">
+        <div class="history-head">
+            <h3>History</h3>
+            <button onclick="clearHistory()">Clear all</button>
+        </div>
+        <div class="history-list" id="history-list"></div>
     </div>
+
     <div class="hint">
-        Web demo page. Every calculation is performed by the backend API
-        (<code>POST /api/calculate</code>); this page only renders the response.
+        Web demo page — every calculation is performed by the backend API
+        (<code>POST /api/calculate</code>). Keyboard: digits, + - * /, ( ),
+        Enter =, Backspace, Esc to clear.
     </div>
 </div>
 <script>
@@ -140,10 +207,12 @@
 
     function equals() {
         if (!expr) return;
+        const sent = expr;
+        display.textContent = "…";
         fetch("/api/calculate", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ expression: expr })
+            body: JSON.stringify({ expression: sent })
         })
             .then(r => r.json())
             .then(j => {
@@ -194,6 +263,23 @@
             fetch("/api/history", { method: "DELETE" }).then(loadHistory);
         }
     }
+
+    document.addEventListener("keydown", e => {
+        const k = e.key;
+        if (k >= "0" && k <= "9") append(k);
+        else if (k === ".") append(".");
+        else if (k === "+") append("+");
+        else if (k === "-") append("-");
+        else if (k === "*") append("×");
+        else if (k === "/") { e.preventDefault(); append("÷"); }
+        else if (k === "(") append("(");
+        else if (k === ")") append(")");
+        else if (k === "%") append("%");
+        else if (k === "^") append("^");
+        else if (k === "Enter" || k === "=") { e.preventDefault(); equals(); }
+        else if (k === "Backspace") backspace();
+        else if (k === "Escape" || k.toLowerCase() === "c") clearAll();
+    });
 
     loadHistory();
 </script>
