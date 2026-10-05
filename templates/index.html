@@ -171,7 +171,7 @@
         color: var(--util-text);
         cursor: pointer;
     }
-    .history-list { max-height: 220px; overflow-y: auto; }
+    .history-list { }
     .row {
         display: flex;
         justify-content: space-between;
@@ -361,7 +361,11 @@
     function toggleHistory() {
         const panel = document.getElementById("history-panel");
         const open = panel.classList.toggle("open");
-        if (open) loadHistory();
+        if (open) {
+            loadHistory();
+            // The page itself scrolls; bring the panel into view.
+            panel.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
     }
 
     function toggleTheme() {
